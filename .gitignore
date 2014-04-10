@@ -1,0 +1,9 @@
+*.pyc
+.pydevproject
+.project
+*.iml
+.idea
+test_venv
+.coverage
+*.egg-info
+.pre-commit-files

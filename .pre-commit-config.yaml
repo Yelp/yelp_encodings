@@ -1,0 +1,13 @@
+-   repo: git@github.com:pre-commit/pre-commit-hooks
+    sha: 82344a4055f4e103afdc31e98a46de679fe55385
+    hooks:
+    -   id: pyflakes
+        files: \.py$
+    -   id: debug-statements
+        files: \.py$
+    -   id: trailing-whitespace
+        files: \.(py|sh|yaml|txt)$
+    -   id: name-tests-test
+        files: tests/.+\.py$
+    -   id: end-of-file-fixer
+        files: \.(py|sh|yaml)$
