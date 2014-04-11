@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import pytest
-from yelp_encodings import internet_encoding
 
 
 # Define some interesting unicode inputs
@@ -14,7 +13,8 @@ class UNICODE(object):
 
 @pytest.fixture(scope='module')
 def setup():
-    internet_encoding.register()
+    import yelp_encodings.internet
+    yelp_encodings.internet.register()
 pytestmark = pytest.mark.usefixtures("setup")
 
 

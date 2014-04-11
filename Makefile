@@ -1,17 +1,17 @@
-.PHONY: all flakes test tests clean coverage
 
-all: tests
+.PHONY: all
+all: venv test
 
-test_venv: requirements.txt
-	rm -rf test_venv
-	virtualenv test_venv
-	bash -c 'source test_venv/bin/activate && \
-	    pip install -r requirements.txt'
+.PHONY: venv
+venv:
+	tox -e venv
 
-test: tests
-tests: flakes test_venv
-	bash -c "source test_venv/bin/activate && testify tests"
+.PHONY:tests test
+tests: test
+test:
+	tox
 
+.PHONY: clean
 clean:
-	rm -rf test_venv
-	find . -iname '*.pyc' -delete
+	find . -iname '*.pyc' | xargs rm
+	rm -rf .tox

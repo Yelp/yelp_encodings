@@ -1,11 +1,13 @@
-*.pyc
+*.py[co]
 .pydevproject
 .project
 *.iml
 .idea
-test_venv
 .coverage
 *.egg-info
 .pre-commit-files
 .*.sw[a-z]
 .tox
+dist
+coverage-html
+venv*
