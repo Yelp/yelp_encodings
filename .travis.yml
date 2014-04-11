@@ -1,8 +1,7 @@
 language: python
-env:
+env: # These should match the tox env list
     - TOXENV=py26
     - TOXENV=py27
-    - TOXENV=py33
 install:
     - pip install tox --use-mirrors
 script: tox
