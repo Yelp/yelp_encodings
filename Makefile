@@ -1,9 +1,6 @@
 .PHONY: all flakes test tests clean coverage
 
-all: flakes tests
-
-flakes:
-	pyflakes yelp_encodings tests setup.py
+all: tests
 
 test_venv: requirements.txt
 	rm -rf test_venv

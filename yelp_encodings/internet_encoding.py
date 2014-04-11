@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
-""" A codec suitable for decoding bytes which come from the internet with ill-defined encoding.
+"""
+A codec suitable for decoding bytes which come from the internet with ill-defined encoding.
 We first try to decode with utf8, then fall back to latin1 (latin1html5, really)
 """
 import codecs
 import encodings.cp1252
 
-### Codec APIs
+# -- Codec APIs --
 
 encode = codecs.utf_8_encode
+
 
 def internet_decode(input, errors='strict', final=False):
     """The core decoding function"""
@@ -29,35 +31,43 @@ def internet_decode(input, errors='strict', final=False):
         else:
             raise
 
+
 def decode(input, errors='strict'):
     return internet_decode(input, errors, True)
+
 
 class IncrementalEncoder(codecs.IncrementalEncoder):
     def encode(self, input, final=False):
         return codecs.utf_8_encode(input, self.errors)[0]
 
+
 class IncrementalDecoder(codecs.BufferedIncrementalDecoder):
     _buffer_decode = internet_decode
+
 
 class StreamWriter(codecs.StreamWriter):
     encode = codecs.utf_8_encode
 
+
 class StreamReader(codecs.StreamReader):
     decode = internet_decode
 
-### codecs API
+
+# -- codecs API --
 
 codec_map = {
-        'internet': codecs.CodecInfo(
-            name='internet',
-            encode=encode,
-            decode=decode,
-            incrementalencoder=IncrementalEncoder,
-            incrementaldecoder=IncrementalDecoder,
-            streamreader=StreamReader,
-            streamwriter=StreamWriter,
-        )
+    'internet': codecs.CodecInfo(
+        name='internet',
+        encode=encode,
+        decode=decode,
+        incrementalencoder=IncrementalEncoder,
+        incrementaldecoder=IncrementalDecoder,
+        streamreader=StreamReader,
+        streamwriter=StreamWriter,
+    )
 }
 
+
 def register():
+    """perform the codec registration."""
     codecs.register(codec_map.get)

@@ -1,88 +1,99 @@
 # -*- coding: utf-8 -*-
-import testify as T
+import pytest
 from yelp_encodings import internet_encoding
 
+
 # Define some interesting unicode inputs
-class UNICODE:
-    ascii = u'A' # The most basic of unicode.
-    latin1 = ascii + u'ü' # U-umlaut. This is defined in latin1 but not ascii.
-    win1252 = latin1 + u'€' # Euro sign. This is defined in windows-1252, but not latin1.
-    bmp = win1252 + u'Ł' # Polish crossed-L. This requires at least a two-byte encoding.
-    utf8 = bmp + u'🐵' # Monkey-face emoji. This requires at least a three-byte encoding.
+class UNICODE(object):
+    ascii = u'A'  # The most basic of unicode.
+    latin1 = ascii + u'ü'  # U-umlaut. This is defined in latin1 but not ascii.
+    win1252 = latin1 + u'€'  # Euro sign. This is defined in windows-1252, but not latin1.
+    bmp = win1252 + u'Ł'  # Polish crossed-L. This requires at least a two-byte encoding.
+    utf8 = bmp + u'🐵'  # Monkey-face emoji. This requires at least a three-byte encoding.
 
 
-class InternetEncodingTestCase(T.TestCase):
+@pytest.fixture(scope='module')
+def setup():
+    internet_encoding.register()
+pytestmark = pytest.mark.usefixtures("setup")
 
-    @T.setup
-    def setup(self):
-        internet_encoding.register()
 
-    def test_256bytes(self):
-        all_bytes = ''.join(chr(i) for i in range(256))
-        T.assert_equal(256, len(all_bytes))
+def test_256bytes():
+    all_bytes = ''.join(chr(i) for i in range(256))
+    assert 256 == len(all_bytes)
 
-        decoded = all_bytes.decode('internet')
-        T.assert_equal(256, len(decoded))
+    decoded = all_bytes.decode('internet')
+    assert 256 == len(decoded)
 
-        decode_map = dict(zip(all_bytes, decoded))
-        T.assert_equal(decode_map['\x80'], u'\x80')
-        T.assert_equal(decode_map['\x81'], u'\x81')  # The unknown glyph.
+    decode_map = dict(zip(all_bytes, decoded))
+    assert decode_map['\x80'] == u'\x80'
+    assert decode_map['\x81'] == u'\x81'  # The unknown glyph.
 
-        # Raw non-utf8 bytes should decode the same as windows-1252-replace.
-        expected = all_bytes.decode('latin1')
-        T.assert_equal(expected, decoded)
+    # Raw non-utf8 bytes should decode the same as windows-1252-replace.
+    expected = all_bytes.decode('latin1')
+    assert expected == decoded
 
-        T.assert_equal(decoded.encode('utf8'), decoded.encode('internet'))
-        T.assert_equal(decoded, decoded.encode('internet').decode('internet'))  # Idempotency.
+    assert decoded.encode('utf8') == decoded.encode('internet')
+    assert decoded == decoded.encode('internet').decode('internet')  # Idempotency.
 
-    def test_256bytes_replace(self):
-        all_bytes = ''.join(chr(i) for i in range(256))
-        T.assert_equal(256, len(all_bytes))
 
-        decoded = all_bytes.decode('internet', 'replace')
-        T.assert_equal(256, len(decoded))
+def test_256bytes_replace():
+    all_bytes = ''.join(chr(i) for i in range(256))
+    assert 256 == len(all_bytes)
 
-        decode_map = dict(zip(all_bytes, decoded))
-        T.assert_equal(decode_map['\x80'], u'�')
-        T.assert_equal(decode_map['\x81'], u'�')  # The unknown glyph.
+    decoded = all_bytes.decode('internet', 'replace')
+    assert 256 == len(decoded)
 
-        # Raw non-utf8 bytes should decode the same as windows-1252-replace.
-        expected = all_bytes.decode('utf-8', 'replace')
-        T.assert_equal(expected, decoded)
+    decode_map = dict(zip(all_bytes, decoded))
+    assert decode_map['\x80'] == u'�'
+    assert decode_map['\x81'] == u'�'  # The unknown glyph.
 
-        T.assert_equal(decoded.encode('utf8'), decoded.encode('internet'))
-        T.assert_equal(decoded, decoded.encode('internet').decode('internet'))  # Idempotency.
+    # Raw non-utf8 bytes should decode the same as windows-1252-replace.
+    expected = all_bytes.decode('utf-8', 'replace')
+    assert expected == decoded
 
-    def test_win1252bytes(self):
-        win1252_bytes = ''.join(sorted(set(chr(i) for i in range(256)) - set('\x81\x8d\x8f\x90\x9d')))
-        T.assert_equal(251, len(win1252_bytes))
+    assert decoded.encode('utf8') == decoded.encode('internet')
+    assert decoded == decoded.encode('internet').decode('internet')  # Idempotency.
 
-        decoded = win1252_bytes.decode('internet')
-        T.assert_equal(251, len(decoded))
 
-        decode_map = dict(zip(win1252_bytes, decoded))
-        T.assert_equal(decode_map['\x80'], u'€')
+def test_win1252bytes():
+    win1252_bytes = ''.join(sorted(set(chr(i) for i in range(256)) - set('\x81\x8d\x8f\x90\x9d')))
+    assert 251 == len(win1252_bytes)
 
-        # Raw non-utf8 bytes should decode the same as windows-1252-replace.
-        expected = win1252_bytes.decode('windows-1252')
-        T.assert_equal(expected, decoded)
+    decoded = win1252_bytes.decode('internet')
+    assert 251 == len(decoded)
 
-        T.assert_equal(decoded.encode('utf8'), decoded.encode('internet'))
-        T.assert_equal(decoded, decoded.encode('internet').decode('internet'))  # Idempotency.
+    decode_map = dict(zip(win1252_bytes, decoded))
+    assert decode_map['\x80'] == u'€'
 
-    def test_is_like_utf8(self):
-        encoded = UNICODE.utf8.encode('internet')
+    # Raw non-utf8 bytes should decode the same as windows-1252-replace.
+    expected = win1252_bytes.decode('windows-1252')
+    assert expected == decoded
 
-        T.assert_equal(UNICODE.utf8.encode('utf8'), encoded)
-        T.assert_equal(UNICODE.utf8, encoded.decode('utf8'))
-        T.assert_equal(UNICODE.utf8, encoded.decode('internet'))
+    assert decoded.encode('utf8') == decoded.encode('internet')
+    assert decoded == decoded.encode('internet').decode('internet')  # Idempotency.
 
-    def test_is_like_windows1252(self):
-        encoded = UNICODE.utf8.encode('windows-1252', 'ignore')
 
-        T.assert_equal(UNICODE.win1252.encode('windows-1252'), encoded)
-        T.assert_equal(UNICODE.win1252, encoded.decode('internet'))
+def test_is_like_utf8():
+    encoded = UNICODE.utf8.encode('internet')
+
+    assert UNICODE.utf8.encode('utf8') == encoded
+    assert UNICODE.utf8 == encoded.decode('utf8')
+    assert UNICODE.utf8 == encoded.decode('internet')
+
+
+def test_is_like_windows1252():
+    encoded = UNICODE.utf8.encode('windows-1252', 'ignore')
+
+    assert UNICODE.win1252.encode('windows-1252') == encoded
+    assert UNICODE.win1252 == encoded.decode('internet')
+
+
+def test_unicode():
+    assert UNICODE.utf8.decode('internet') == UNICODE.utf8
 
 
 if __name__ == '__main__':
-    T.run()
+    import sys
+    sys.argv.insert(0, 'py.test')
+    exit(pytest.main())

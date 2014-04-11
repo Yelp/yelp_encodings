@@ -1,0 +1,8 @@
+-e .
+
+# Testing requirements
+git+git://github.com/pre-commit/pre-commit#egg=pre-commit
+pytest
+flake8
+coverage
+pylint
