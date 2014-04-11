@@ -2,7 +2,22 @@ from setuptools import find_packages
 from setuptools import setup
 
 setup(
-    name="Encoding Utilities",
-    version="0.1.0",
+    name="yelp_encodings",
+    url='https://github.com/Yelp/yelp_encodings',
+    version="0.1.2",
+
+    author='Buck Golemon',
+    author_email='buck@yelp.com',
+    description='string encodings invented and maintained by yelp',
+    long_description=open('README.md').read(),
+
+    platforms='any',
+    license='unlicense',
+    classifiers=[
+        'License :: Public Domain',
+        'Programming Language :: Python :: 2.6',
+        'Programming Language :: Python :: 2.7',
+    ],
+
     packages=find_packages('.', exclude=('tests*')),
 )
