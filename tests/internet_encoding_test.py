@@ -93,6 +93,16 @@ def test_unicode():
     assert UNICODE.utf8.decode('internet') == UNICODE.utf8
 
 
+def test_incremental_encode():
+    from codecs import iterencode
+    encoded = iterencode(
+        (c for c in UNICODE.utf8),
+        'internet'
+    )
+    encoded = ''.join(encoded)
+    assert encoded == UNICODE.utf8.encode('UTF-8')
+
+
 if __name__ == '__main__':
     import sys
     sys.argv.insert(0, 'py.test')
