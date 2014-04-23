@@ -1,29 +1,39 @@
-# yelp_encodings
+# yelp\_encodings
 
-[![Build Status](https://travis-ci.org/Yelp/yelp_encodings.svg)](https://travis-ci.org/Yelp/yelp_encodings)
+[![Build Status](https://travis-ci.org/Yelp/yelp_encodings.svg)](https://travis-ci.org/Yelp/yelp\_encodings)
 
-yelp_encodings is a Python library created by Yelp to help handle unknown character encodings. That is, when the data you're getting may not be Unicode, it'll effortlessly convert it to Unicode for you.
+`yelp_encodings` contains an 'internet' encoding which is appropriate for dealing with poorly encoded bytes coming from
+internet clients. The internet encoding will always succeed in decoding any bytestring. This is most often useful for
+logging bad requests. 
+
 
 ## Installation
 
-Installing is easy! The package lives on PyPI so just run
+For a primer on pip and virtualenv, see the [Python Packaging User Guide](https://python-packaging-user-guide.readthedocs.org/en/latest/tutorial.html).
 
-```
-$ pip install yelp_encodings
-```
+TL;DR: `pip install yelp_encodings`
 
-And you're done!
 
 ## Usage
 
-Import the library and just call ``decode`` with the data you want to decode
+Once you've registered the codec with python, you can use it anywhere in your app.
 
-```
-from yelp_encodings import internet
+```python
+>>> from yelp_encodings import internet
+>>> internet.register()
 
-string = 'hello world'
-internet.decode(string) # => (u'hello world!', 12)
+>>> euro = u'€'
 
-string = 'Hêllô wõrld'
-internet.decode(string) # => (u'H\xeall\xf4 w\xf5rld', 14)
+>>> import json
+>>> print json.dumps(dict(
+...    utf8=euro.encode('UTF-8'),
+...    cp1252=euro.encode('cp1252'),
+...    unicode=euro,
+... ), indent=4, sort_keys=True, encoding='internet')
+{
+    "cp1252": "\u20ac", 
+    "unicode": "\u20ac", 
+    "utf8": "\u20ac"
+}
+
 ```
