@@ -1,5 +1,5 @@
 [MESSAGES CONTROL]
-disable=abstract-method,locally-disabled,missing-docstring,redefined-builtin
+disable=locally-disabled,missing-docstring
 
 [REPORTS]
 output-format=colorized
