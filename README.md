@@ -24,16 +24,10 @@ Once you've registered the codec with python, you can use it anywhere in your ap
 
 >>> euro = u'€'
 
->>> import json
->>> print json.dumps(dict(
-...    utf8=euro.encode('UTF-8'),
-...    cp1252=euro.encode('cp1252'),
-...    unicode=euro,
-... ), indent=4, sort_keys=True, encoding='internet')
-{
-    "cp1252": "\u20ac", 
-    "unicode": "\u20ac", 
-    "utf8": "\u20ac"
-}
+>>> print(euro.encode('UTF-8').decode('internet'))
+€
+
+>>> print(euro.encode('cp1252').decode('internet'))
+€
 
 ```

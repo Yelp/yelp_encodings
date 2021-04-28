@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
+import yelp_encodings.internet
+
 import pytest
+
+PY2 = str is bytes
 
 
 # Define some interesting unicode inputs
@@ -15,19 +19,24 @@ class UNICODE(object):
 def setup():
     import yelp_encodings.internet
     yelp_encodings.internet.register()
+
+
 pytestmark = pytest.mark.usefixtures("setup")
 
 
 def test_256bytes():
-    all_bytes = ''.join(chr(i) for i in range(256))
+    if PY2:
+        all_bytes = ''.join(chr(i) for i in range(256))  # pragma: no cover
+    else:
+        all_bytes = bytes(range(256))  # pragma: no cover
     assert 256 == len(all_bytes)
 
     decoded = all_bytes.decode('internet')
     assert 256 == len(decoded)
 
     decode_map = dict(zip(all_bytes, decoded))
-    assert decode_map['\x80'] == u'\x80'
-    assert decode_map['\x81'] == u'\x81'  # The unknown glyph.
+    assert decode_map['\x80' if PY2 else 0x80] == u'\x80'
+    assert decode_map['\x81' if PY2 else 0x81] == u'\x81'  # The unknown glyph.
 
     # Raw non-utf8 bytes should decode the same as windows-1252-replace.
     expected = all_bytes.decode('latin1')
@@ -38,15 +47,18 @@ def test_256bytes():
 
 
 def test_256bytes_replace():
-    all_bytes = ''.join(chr(i) for i in range(256))
+    if PY2:
+        all_bytes = ''.join(chr(i) for i in range(256))  # pragma: no cover
+    else:
+        all_bytes = bytes(range(256))  # pragma: no cover
     assert 256 == len(all_bytes)
 
     decoded = all_bytes.decode('internet', 'replace')
     assert 256 == len(decoded)
 
     decode_map = dict(zip(all_bytes, decoded))
-    assert decode_map['\x80'] == u'�'
-    assert decode_map['\x81'] == u'�'  # The unknown glyph.
+    assert decode_map['\x80' if PY2 else 0x80] == u'�'
+    assert decode_map['\x81' if PY2 else 0x81] == u'�'  # The unknown glyph.
 
     # Raw non-utf8 bytes should decode the same as windows-1252-replace.
     expected = all_bytes.decode('utf-8', 'replace')
@@ -57,14 +69,17 @@ def test_256bytes_replace():
 
 
 def test_win1252bytes():
-    win1252_bytes = ''.join(sorted(set(chr(i) for i in range(256)) - set('\x81\x8d\x8f\x90\x9d')))
+    if PY2:
+        win1252_bytes = ''.join(sorted(set(chr(i) for i in range(256)) - set('\x81\x8d\x8f\x90\x9d')))  # pragma: no cover
+    else:
+        win1252_bytes = bytes(sorted(set(range(256)) - {0x81, 0x8d, 0x8f, 0x90, 0x9d}))  # pragma: no cover
     assert 251 == len(win1252_bytes)
 
     decoded = win1252_bytes.decode('internet')
     assert 251 == len(decoded)
 
     decode_map = dict(zip(win1252_bytes, decoded))
-    assert decode_map['\x80'] == u'€'
+    assert decode_map['\x80' if PY2 else 0x80] == u'€'
 
     # Raw non-utf8 bytes should decode the same as windows-1252-replace.
     expected = win1252_bytes.decode('windows-1252')
@@ -90,7 +105,7 @@ def test_is_like_windows1252():
 
 
 def test_unicode():
-    assert UNICODE.utf8.decode('internet') == UNICODE.utf8
+    assert UNICODE.utf8.encode('utf8').decode('internet') == UNICODE.utf8
 
 
 def test_incremental_encode():
@@ -99,8 +114,14 @@ def test_incremental_encode():
         (c for c in UNICODE.utf8),
         'internet'
     )
-    encoded = ''.join(encoded)
+    encoded = b''.join(encoded)
     assert encoded == UNICODE.utf8.encode('UTF-8')
+
+
+def test_incremental_decode():
+    decoder = yelp_encodings.internet.IncrementalDecoder()
+    result = decoder.decode(b'hello world', True)
+    assert result == 'hello world'
 
 
 if __name__ == '__main__':
