@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import yelp_encodings.internet
+
 import pytest
 
 
@@ -101,6 +103,12 @@ def test_incremental_encode():
     )
     encoded = ''.join(encoded)
     assert encoded == UNICODE.utf8.encode('UTF-8')
+
+
+def test_incremental_decode():
+    decoder = yelp_encodings.internet.IncrementalDecoder()
+    result = decoder.decode(b'hello world', True)
+    assert result == 'hello world'
 
 
 if __name__ == '__main__':

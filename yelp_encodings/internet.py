@@ -42,7 +42,7 @@ class IncrementalEncoder(codecs.IncrementalEncoder):
 
 
 class IncrementalDecoder(codecs.BufferedIncrementalDecoder):
-    _buffer_decode = internet_decode
+    _buffer_decode = staticmethod(internet_decode)
 
 
 class StreamWriter(codecs.StreamWriter):
