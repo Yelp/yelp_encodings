@@ -128,6 +128,27 @@ def test_incremental_decode():
     assert result == "hello world"
 
 
+def test_streaming_encode(tmp_path):
+    from codecs import open as codecs_open
+
+    writeme_file = tmp_path / "writeme"
+    writeme = codecs_open(writeme_file, mode="w", encoding="internet")
+    writeme.write(UNICODE.utf8)
+    writeme.close()
+
+    assert writeme_file.read_bytes() == UNICODE.utf8.encode("utf8")
+
+
+def test_streaming_decode(tmp_path):
+    from codecs import open as codecs_open
+
+    readme_file = tmp_path / "readme"
+    readme_file.write_bytes(UNICODE.utf8.encode("utf8"))
+
+    readme = codecs_open(readme_file, mode="r", encoding="internet")
+    assert readme.read() == UNICODE.utf8
+
+
 if __name__ == "__main__":
     import sys
 
