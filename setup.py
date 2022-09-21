@@ -22,6 +22,9 @@ def main():
             'typing-extensions'
         ],
         python_requires='>=3.7',
+        package_data={
+            "yelp_encodings": ["py.typed"],
+        },
         packages=find_packages('.', exclude=('tests*',)),
     )
 
