@@ -24,12 +24,6 @@ def internet_decode(input, errors='strict', final=False):
         except UnicodeDecodeError:
             # and finally, try latin-1, which never fails, but defines 27 less characters than cp1252.
             return codecs.latin_1_decode(input, errors)
-    except UnicodeEncodeError:  # pragma: no cover (cannot happen under py3)
-        # Was that thing already unicode? Then it's already decoded.
-        if isinstance(input, unicode):  # noqa: F821 (exists only under py2)
-            return (input, len(input))
-        else:
-            raise
 
 
 def decode(input, errors='strict'):
