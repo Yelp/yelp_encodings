@@ -11,6 +11,9 @@ tests: test
 test:
 	tox
 
+install-hooks:
+	tox -e pre-commit
+
 .PHONY: clean
 clean:
 	find . -iname '*.pyc' | xargs rm

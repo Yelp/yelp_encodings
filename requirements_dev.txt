@@ -1,7 +1,7 @@
 -e .
+coverage
+flake8
 
 # Testing requirements
 pre-commit
 pytest
-flake8
-coverage

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 A codec suitable for decoding bytes which come from the internet with ill-defined encoding.
 We first try to decode with utf8, then fall back to latin1 (latin1html5, really)
@@ -11,7 +10,7 @@ import encodings.cp1252
 encode = codecs.utf_8_encode
 
 
-def internet_decode(input, errors='strict', final=False):
+def internet_decode(input, errors="strict", final=False):
     """The core decoding function"""
     try:
         # First try utf-8. This should be the usual case by far.
@@ -26,7 +25,7 @@ def internet_decode(input, errors='strict', final=False):
             return codecs.latin_1_decode(input, errors)
 
 
-def decode(input, errors='strict'):
+def decode(input, errors="strict"):
     return internet_decode(input, errors, True)
 
 
@@ -50,8 +49,8 @@ class StreamReader(codecs.StreamReader):
 # -- codecs API --
 
 codec_map = {
-    'internet': codecs.CodecInfo(
-        name='internet',
+    "internet": codecs.CodecInfo(
+        name="internet",
         encode=encode,
         decode=decode,
         incrementalencoder=IncrementalEncoder,
