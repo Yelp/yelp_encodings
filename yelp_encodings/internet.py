@@ -4,13 +4,19 @@ We first try to decode with utf8, then fall back to latin1 (latin1html5, really)
 """
 import codecs
 import encodings.cp1252
+from typing import cast
+from typing import Tuple
+
+from typing_extensions import Protocol
 
 # -- Codec APIs --
 
 encode = codecs.utf_8_encode
 
 
-def internet_decode(input, errors="strict", final=False):
+def internet_decode(
+    input: bytes, errors: str = "strict", final: bool = False
+) -> Tuple[str, int]:
     """The core decoding function"""
     try:
         # First try utf-8. This should be the usual case by far.
@@ -25,33 +31,46 @@ def internet_decode(input, errors="strict", final=False):
             return codecs.latin_1_decode(input, errors)
 
 
-def decode(input, errors="strict"):
+def decode(input: bytes, errors: str = "strict") -> Tuple[str, int]:
     return internet_decode(input, errors, True)
 
 
 class IncrementalEncoder(codecs.IncrementalEncoder):
-    def encode(self, input, final=False):
+    def encode(self, input: str, final: bool = False) -> bytes:
         return codecs.utf_8_encode(input, self.errors)[0]
 
 
 class IncrementalDecoder(codecs.BufferedIncrementalDecoder):
-    _buffer_decode = staticmethod(internet_decode)
+    def _buffer_decode(
+        self, input: bytes, errors: str = "strict", final: bool = False
+    ) -> Tuple[str, int]:
+        return internet_decode(input, errors, final)
 
 
 class StreamWriter(codecs.StreamWriter):
-    encode = codecs.utf_8_encode
+    def encode(self, input: str, errors: str = "strict") -> Tuple[bytes, int]:
+        return codecs.utf_8_encode(input, errors)
 
 
 class StreamReader(codecs.StreamReader):
-    decode = internet_decode
+    def decode(self, input: bytes, errors: str = "strict") -> Tuple[str, int]:
+        return internet_decode(input, errors)
 
 
 # -- codecs API --
 
+# From typeshed.stdlibs.codecs
+class _Encoder(Protocol):
+    def __call__(
+        self, input: str, errors: str = ...
+    ) -> Tuple[bytes, int]:  # pragma: no cover
+        ...  # signature of Codec().encode
+
+
 codec_map = {
     "internet": codecs.CodecInfo(
         name="internet",
-        encode=encode,
+        encode=cast(_Encoder, encode),
         decode=decode,
         incrementalencoder=IncrementalEncoder,
         incrementaldecoder=IncrementalDecoder,
@@ -61,6 +80,6 @@ codec_map = {
 }
 
 
-def register():
+def register() -> None:
     """perform the codec registration."""
     codecs.register(codec_map.get)

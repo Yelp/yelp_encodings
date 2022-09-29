@@ -18,7 +18,13 @@ def main():
             'Programming Language :: Python :: 3',
             'Programming Language :: Python :: 3.7',
         ],
+        install_requires=[
+            'typing-extensions'
+        ],
         python_requires='>=3.7',
+        package_data={
+            "yelp_encodings": ["py.typed"],
+        },
         packages=find_packages('.', exclude=('tests*',)),
     )
 
