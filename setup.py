@@ -6,7 +6,7 @@ def main():
     setup(
         name="yelp_encodings",
         url='https://github.com/Yelp/yelp_encodings',
-        version="1.0.0",
+        version="2.0.0",
 
         author='Buck Golemon',
         author_email='buck@yelp.com',
